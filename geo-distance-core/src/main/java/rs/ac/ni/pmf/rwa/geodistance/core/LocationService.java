@@ -48,18 +48,19 @@ public class LocationService
 
     public void updateLocation(final String postalCode, final Location location)
     {
-        if (locationProvider.getLocation(postalCode).isEmpty())
-		{
-            throw new UnknownLocationException(postalCode);
-        }
+		locationProvider.getLocation(postalCode)
+				.orElseThrow(()->new UnknownLocationException(postalCode));
 
-		if (!postalCode.equals(location.getPostalCode()))
-		{
-			validatePostalCode(location.getPostalCode());
+		String newPostalCode=location.getPostalCode();
 
-			if (locationProvider.getLocation(postalCode).isPresent())
+
+		if (!postalCode.equals(newPostalCode))
+		{
+			validatePostalCode(newPostalCode);
+
+			if (locationProvider.getLocation(newPostalCode).isPresent())
 			{
-				throw new DuplicatePostalCodeException(postalCode);
+				throw new DuplicatePostalCodeException(newPostalCode);
 			}
 
 			locationProvider.removeLocation(postalCode);
