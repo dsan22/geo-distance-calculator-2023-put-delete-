@@ -1,5 +1,7 @@
 package rs.ac.ni.pmf.rwa.geodistance.rest;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,12 +17,14 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Locations API",description = "CRUD operations for Locations")
 public class LocationRestController
 {
 	private final LocationService locationService;
 	private final LocationMapper locationMapper;
 
 	@GetMapping("/locations")
+	@Operation(description = "Get description od all Locations",summary = "List of all Locations")
 	public List<LocationDTO> getLocations()
 	{
 		return locationService.getLocations().stream()
