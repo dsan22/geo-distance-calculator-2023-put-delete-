@@ -2,8 +2,7 @@ package rs.ac.ni.pmf.rwa.geodistance.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
@@ -13,6 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rs.ac.ni.pmf.rwa.geodistance.core.model.Location;
+import rs.ac.ni.pmf.rwa.geodistance.exception.DuplicatePostalCodeException;
+import rs.ac.ni.pmf.rwa.geodistance.exception.InvalidPostalCodeException;
 import rs.ac.ni.pmf.rwa.geodistance.exception.UnknownLocationException;
 
 import java.util.List;
@@ -62,7 +63,53 @@ class LocationServiceTest {
                 .hasMessage("Unknown location for postal code 'X'");
     }
 
+    @Test
+    public  void shouldThrowWhenBadPostalCode()
+    {
+        final Location location =mock(Location.class);
+        when(location.getPostalCode()).thenReturn(null);
+        assertThatThrownBy(()->locationService.createLocation(location))
+                .isInstanceOf(InvalidPostalCodeException.class);
+
+        final Location location2 =mock(Location.class);
+        when(location.getPostalCode()).thenReturn("     ");
+
+        assertThatThrownBy(()->locationService.createLocation(location2))
+                .isInstanceOf(InvalidPostalCodeException.class);
+    }
+
+    @Test
+    public void shouldThrowWhenPostalCodeAlreadyExists(){
+        final String postalCode="ABC";
+        final Location location=mock(Location.class);
+        when(location.getPostalCode()).thenReturn(postalCode);
+
+        final Location existingLocation=mock(Location.class);
 
 
+        when(locationProvider.getLocation(postalCode))
+                .thenReturn(Optional.of(existingLocation));
+
+        assertThatThrownBy(()->locationService.createLocation(location))
+                .isInstanceOf(DuplicatePostalCodeException.class);
+
+    }
+
+    @Test
+    public void shouldCreateLocation()
+    {
+        final String postalCode="ABC";
+        final Location location=mock(Location.class);
+        when(location.getPostalCode()).thenReturn(postalCode);
+
+        when(locationProvider.getLocation(postalCode))
+                .thenReturn(Optional.empty());
+
+        locationService.createLocation(location);
+        verify(locationProvider).saveLocation(location);
+    }
+    //update location Tests
+
+    //delete Location Tests
 
 }
